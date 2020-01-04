@@ -4,15 +4,6 @@ import requests
 import matplotlib.pyplot as plt 
 from bs4 import BeautifulSoup
 
-# Requesting page elements
-r = requests.get('https://www.renthop.com/nyc/apartments-for-rent')
-
-# Analyzing page elements with BeautifulSoup
-soup = BeautifulSoup(r.content, 'html5lib')
-
-# Listing all divs that contains 'search-info' 
-listing_divs = soup.select('div[class*=search-info]')
-
 # Definition of function to parse parse_data
 def parse_data(listing_divs):
     listing_list = []
@@ -37,11 +28,25 @@ def parse_data(listing_divs):
         listing_list.append(indiv_listing)
     return listing_list
 
-
 url_prefix = 'https://www.renthop.com/search/nyc?max_price=50000&min_price=0&page='
 url_suffix = '&sort=hopscore&q=&search=0'
 page_number = 1
-for i in range(3):
+all_pages_parsed = []
+for i in range(30):
+    # Requesting page elements
     target_page = url_prefix + str(page_number) + url_suffix
     print(target_page)
+    r = requests.get(target_page)
+    # Analyzing page elements with BeautifulSoup
+    soup = BeautifulSoup(r.content,'html5lib')
+    # Listing all divs that contains 'search-info' 
+    listing_divs = soup.select('div[class*=search-info]')
+    one_page_parsed = parse_data(listing_divs)
+    all_pages_parsed.extend(one_page_parsed)
     page_number += 1
+
+
+# Creating DataFrame for the data 
+
+df = pd.DataFrame(all_pages_parsed, columns=['url', 'address', 'neighborhood', 'rent', 'beds', 'baths'])
+print(df)
