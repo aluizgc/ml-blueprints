@@ -32,7 +32,7 @@ url_prefix = 'https://www.renthop.com/search/nyc?max_price=50000&min_price=0&pag
 url_suffix = '&sort=hopscore&q=&search=0'
 page_number = 1
 all_pages_parsed = []
-for i in range(10):
+for i in range(100):
     # Requesting page elements
     target_page = url_prefix + str(page_number) + url_suffix
     print('Page {}'.format(page_number)+' complete.')
@@ -51,7 +51,7 @@ for i in range(10):
 df = pd.DataFrame(all_pages_parsed, columns=['url', 'address', 'neighborhood', 'rent', 'beds', 'baths', 'unknown'])
 
 # Dropping rows that have values in the unknown column
-rows_to_drop = df[df['baths'] == '/_Flex_2_'].index
+rows_to_drop = df[(df['baths'] == '/_Flex_1_') & (df['baths'] == '/_Flex_2_') & (df['baths'] == '/_Flex_3_') & (df['baths'] == '/_Flex_4_') & (df['baths'] == '/_Flex_5_') & (df['baths'] == '/_Flex_6_') & (df['baths'] == '/_Flex_9_')].index
 df.drop(rows_to_drop, inplace = True)
 df.drop('unknown', axis=1,  inplace = True)
 
