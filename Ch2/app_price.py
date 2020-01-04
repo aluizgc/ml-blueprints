@@ -22,7 +22,7 @@ def parse_data(listing_divs):
             try:
                 values = spec.text.strip().replace(' ','_').split()
                 clean_values = [x for x in values if x != '_']
-                indiv_listing.extend(spec.text.strip().replace(' ','_').split())
+                indiv_listing.extend(clean_values)
             except:
                 indiv_listing.extend(np.nan)
         listing_list.append(indiv_listing)
@@ -32,10 +32,10 @@ url_prefix = 'https://www.renthop.com/search/nyc?max_price=50000&min_price=0&pag
 url_suffix = '&sort=hopscore&q=&search=0'
 page_number = 1
 all_pages_parsed = []
-for i in range(30):
+for i in range(10):
     # Requesting page elements
     target_page = url_prefix + str(page_number) + url_suffix
-    print(target_page)
+    print('Page {}'.format(page_number)+' complete.')
     r = requests.get(target_page)
     # Analyzing page elements with BeautifulSoup
     soup = BeautifulSoup(r.content,'html5lib')
@@ -48,5 +48,12 @@ for i in range(30):
 
 # Creating DataFrame for the data 
 
-df = pd.DataFrame(all_pages_parsed, columns=['url', 'address', 'neighborhood', 'rent', 'beds', 'baths'])
+df = pd.DataFrame(all_pages_parsed, columns=['url', 'address', 'neighborhood', 'rent', 'beds', 'baths', 'unknown'])
+
+# Dropping rows that have values in the unknown column
+rows_to_drop = df[df['baths'] == '/_Flex_2_'].index
+df.drop(rows_to_drop, inplace = True)
+df.drop('unknown', axis=1,  inplace = True)
+
+#df.drop(df[df.unknown != 'None'].index, inplace=True)
 print(df)
