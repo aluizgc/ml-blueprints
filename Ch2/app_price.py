@@ -56,4 +56,4 @@ df.drop(rows_to_drop, inplace = True)
 df.drop('unknown', axis=1,  inplace = True)
 
 #df.drop(df[df.unknown != 'None'].index, inplace=True)
-print(df)a
+print(df)
