@@ -32,7 +32,7 @@ url_prefix = 'https://www.renthop.com/search/nyc?max_price=50000&min_price=0&pag
 url_suffix = '&sort=hopscore&q=&search=0'
 page_number = 1
 all_pages_parsed = []
-for i in range(100):
+for i in range(1):
     # Requesting page elements
     target_page = url_prefix + str(page_number) + url_suffix
     print('Page {}'.format(page_number)+' complete.')
@@ -55,5 +55,22 @@ rows_to_drop = df[(df['baths'] == '/_Flex_1_') | (df['baths'] == '/_Flex_2_') | 
 df.drop(rows_to_drop, inplace = True)
 df.drop('unknown', axis=1,  inplace = True)
 
-#df.drop(df[df.unknown != 'None'].index, inplace=True)
-print(df)
+# Cleaning up data
+df['beds'] = df['beds'].map(lambda x: x[1:] if x.startswith('_') else x)
+df['baths'] = df['baths'].map(lambda x: x[1:] if x.startswith('_') else x)
+df['rent'] = df['rent'].map(lambda x: str(x).replace('$','').replace(',','')).astype('int')
+df['beds'] = df['beds'].map(lambda x: x.replace('_Bed', ''))
+df['beds'] = df['beds'].map(lambda x: x.replace('Studio', '0'))
+df['beds'] = df['beds'].map(lambda x: x.replace('Loft', '0')).astype('int')
+df['baths'] = df['baths'].map(lambda x: x.replace('_Bath','')).astype('float')
+#print(df.describe())
+#print(df.dtypes)
+
+# Units in each neighborhood
+print(df.groupby('neighborhood')['rent'].count().to_frame('count').sort_values(by='count', ascending=False))
+
+# Fixing leading and trailing spaces
+df['neighborhood'] = df['neighborhood'].map(lambda x: x.strip())
+
+# Mean rent by neighborhood
+print(df.groupby('neighborhood')['rent'].mean().to_frame('mean_rent').sort_values(by='mean_rent', ascending=False))
